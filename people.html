@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>People</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 40px;
+            background: #f2f5f9;
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .heading h1 {
+            font-size: 40px;
+            color: #222;
+        }
+
+        .heading p {
+            color: #777;
+            margin-top: 8px;
+        }
+
+        /* CARDS CONTAINER */
+
+        #people-card {
+            max-width: 1100px;
+            margin: auto;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(280px, 1fr));
+
+            gap: 25px;
+        }
+
+        /* SINGLE CARD */
+
+        .card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 8px 25px rgba(0, 0, 0, 0.10);
+
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h1 {
+            font-size: 25px;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            font-weight: normal;
+            color: #777;
+
+            margin-bottom: 25px;
+
+            word-break: break-word;
+        }
+
+        /* BUTTONS */
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .buttons button {
+            flex: 1;
+
+            padding: 11px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            color: white;
+
+            font-size: 15px;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .edit-btn {
+            background: #4285f4;
+        }
+
+        .edit-btn:hover {
+            background: #2868d8;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+        }
+
+        /* EMPTY MESSAGE */
+
+        .empty {
+            text-align: center;
+
+            grid-column: 1 / -1;
+
+            background: white;
+
+            padding: 40px;
+
+            border-radius: 15px;
+
+            color: #777;
+        }
+
+        @media (max-width: 600px) {
+
+            body {
+                padding: 20px;
+            }
+
+            .heading h1 {
+                font-size: 30px;
+            }
+
+            #people-card {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="heading">
+
+        <h1>People</h1>
+
+        <p>All registered people</p>
+
+    </div>
+
+
+    <!-- IMPORTANT: ID MUST BE people-card -->
+
+    <div id="people-card"></div>
+
+
+
+    <!-- FIREBASE V8 -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+
+    <script>
+
+        // FIREBASE CONFIG
+
+        var firebaseConfig = {
+
+            apiKey: "AIzaSyDT8lrD8G0jzMo_76_SNxH22AN9KJO4ZQA",
+
+            authDomain: "js-quiz-4.firebaseapp.com",
+
+            databaseURL:
+                "https://js-quiz-4-default-rtdb.firebaseio.com/",
+
+            projectId: "js-quiz-4",
+
+            storageBucket:
+                "js-quiz-4.firebasestorage.app",
+
+            messagingSenderId: "698168219648",
+
+            appId:
+                "1:698168219648:web:ff0280a8c54ee9c4a660e5"
+
+        };
+
+
+        // INITIALIZE FIREBASE
+
+        firebase.initializeApp(firebaseConfig);
+
+
+        // DATABASE
+
+        var database = firebase.database();
+
+
+        // CARD CONTAINER
+
+        var peopleCard =
+            document.getElementById("people-card");
+
+
+        // READ ALL DATA
+
+        database.ref("people").on("value", function(snapshot) {
+
+
+            // Remove old cards
+
+            peopleCard.innerHTML = "";
+
+
+            // No data
+
+            if (!snapshot.exists()) {
+
+                peopleCard.innerHTML = `
+                
+                    <div class="empty">
+
+                        <h2>No people found</h2>
+
+                        <p>Add a person from the signup page.</p>
+
+                    </div>
+
+                `;
+
+                return;
+            }
+
+
+            // Create a card for every person
+
+            snapshot.forEach(function(childSnapshot) {
+
+
+                var id = childSnapshot.key;
+
+                var person = childSnapshot.val();
+
+
+                var username =
+                    person.username || "No Name";
+
+                var email =
+                    person.email || "No Email";
+
+
+                // CREATE CARD
+
+                var card =
+                    document.createElement("div");
+
+
+                card.className = "card";
+
+
+                card.innerHTML = `
+
+                    <h1>${username}</h1>
+
+                    <h2>${email}</h2>
+
+                    <div class="buttons">
+
+                        <button class="edit-btn">
+                            Edit
+                        </button>
+
+                        <button class="delete-btn">
+                            Delete
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                // ADD CARD
+
+                peopleCard.appendChild(card);
+
+
+
+                // =========================
+                // EDIT
+                // =========================
+
+                var editBtn =
+                    card.querySelector(".edit-btn");
+
+
+                editBtn.addEventListener("click", function() {
+
+
+                    var newUsername =
+                        prompt(
+                            "Enter new name:",
+                            username
+                        );
+
+
+                    if (newUsername === null) {
+                        return;
+                    }
+
+
+                    var newEmail =
+                        prompt(
+                            "Enter new email:",
+                            email
+                        );
+
+
+                    if (newEmail === null) {
+                        return;
+                    }
+
+
+                    if (
+                        newUsername.trim() === "" ||
+                        newEmail.trim() === ""
+                    ) {
+
+                        alert(
+                            "Name and email cannot be empty!"
+                        );
+
+                        return;
+                    }
+
+
+                    // UPDATE FIREBASE
+
+                    database
+                        .ref("people/" + id)
+                        .update({
+
+                            username:
+                                newUsername.trim(),
+
+                            email:
+                                newEmail.trim()
+
+                        })
+
+                        .then(function() {
+
+                            alert(
+                                "Person updated successfully!"
+                            );
+
+                        })
+
+                        .catch(function(error) {
+
+                            alert(error.message);
+
+                        });
+
+                });
+
+
+
+                // =========================
+                // DELETE
+                // =========================
+
+                var deleteBtn =
+                    card.querySelector(".delete-btn");
+
+
+                deleteBtn.addEventListener(
+                    "click",
+                    function() {
+
+
+                        var confirmDelete =
+                            confirm(
+                                "Delete " +
+                                username +
+                                "?"
+                            );
+
+
+                        if (!confirmDelete) {
+                            return;
+                        }
+
+
+                        // DELETE FROM FIREBASE
+
+                        database
+                            .ref("people/" + id)
+                            .remove()
+
+                            .then(function() {
+
+                                alert(
+                                    "Person deleted successfully!"
+                                );
+
+                            })
+
+                            .catch(function(error) {
+
+                                alert(error.message);
+
+                            });
+
+                    }
+                );
+
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>
+```
